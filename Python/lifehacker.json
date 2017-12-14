@@ -1,0 +1,13 @@
+{
+  "options": {
+    "strcode": "eyn18a",
+    "pausetime": 0.3,
+    "usetesseract": "f",
+    "useproxy": "f",
+    "useonlyproxy": "f",
+    "imgsavefolder": "c:/prntscr/",
+    "imgreadfolder": "c:/ocrread/",
+    "imgtextfolder": "c:/ocrtext/",
+    "imgtoreadfolder": "c:/ocrtoread/"
+  }
+}
