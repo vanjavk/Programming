@@ -80,6 +80,12 @@ function parseAliens($aliens){
 
 $n=intval($_GET["n"]);
 $m=intval($_GET["m"]);
+if ($m>50){
+	$m=50;
+}
+if ($n>50){
+	$n=50;
+}
 $aliens=parseAliens($_GET["aliens"]);
 $aliens1=parseAliens($_GET["aliens"]);
 
