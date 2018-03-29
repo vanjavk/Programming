@@ -1,0 +1,492 @@
+<canvas id="game" width="500" height="500" style="border:1px solid #000000"></canvas>
+
+<script src="/socket.io/socket.io.js"></script>
+<script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+
+
+<script>
+var canvas = document.getElementById("game");
+var ctx = canvas.getContext("2d");
+
+</script>
+
+
+<script>
+    var W = [119,87];
+    var A = [97,65];
+    var S = [115,83];
+    var D = [100,68];
+    var FPSlock = 240;
+    var time1,time2 = 0;
+    var socket = io();
+    var FPS = 0;
+    var second=1000;
+    var GMT = -(new Date()).getTimezoneOffset()/60;
+    var mousePosition;
+    var chat = {msgs:new Array,chatHistory:new Array,maxChatLength:100,leftMargin:5,rightMargin:5,x:5,y:100,h:100,w:300,font:"Consolas",fontSize:14,startAlpha:20*second,endAlpha:4*second,chatOffset:0,maxWindowLength:8,holdingMove:false,holdingResize:false};
+
+    //var socket = io.connect("http://141.136.147.140:2000");
+    var send = function(){
+        socket.emit('chat',{
+            text:document.getElementById("chatinput").value
+        });
+        document.getElementById("chatinput").value = '';
+    }
+
+    document.onkeydown = function(event){
+        if(D.includes(event.which) || D.includes(event.keyCode))    //d
+            socket.emit('keyPress',{inputId:'right',state:1});
+        else if(S.includes(event.which) || S.includes(event.keyCode))   //s
+            socket.emit('keyPress',{inputId:'down',state:1});
+        else if(A.includes(event.which) || A.includes(event.keyCode)) //a
+            socket.emit('keyPress',{inputId:'left',state:1});
+        else if(W.includes(event.which) || W.includes(event.keyCode)) // w
+            socket.emit('keyPress',{inputId:'up',state:1});
+           
+    }
+    document.onkeyup = function(event){
+        if(D.includes(event.which) || D.includes(event.keyCode))    //d
+            socket.emit('keyPress',{inputId:'right',state:0});
+        else if(S.includes(event.which) || S.includes(event.keyCode))   //s
+            socket.emit('keyPress',{inputId:'down',state:0});
+        else if(A.includes(event.which) || A.includes(event.keyCode)) //a
+            socket.emit('keyPress',{inputId:'left',state:0});
+        else if(W.includes(event.which) || W.includes(event.keyCode)) // w
+            socket.emit('keyPress',{inputId:'up',state:0});
+    }
+
+    keyPress = function(event){
+
+
+        if (W.includes(event.which) || W.includes(event.keyCode)) 
+        {
+            console.log("yay");
+        }
+        if (event.which == 13 || event.keyCode == 13) 
+        {
+            socket.emit('chat',{
+                text:document.getElementById("chatinput").value
+            });
+            document.getElementById("chatinput").value = '';
+        }
+    }
+    socket.on('handshake',function(data){
+
+        document.getElementById("yourname").innerHTML = data.name;
+    });
+
+    socket.on('chat',function(data){
+
+
+        var newData = JSON.parse(data.data);
+        newData.rDate = Date.now();
+        newData.localDate = Date.now();
+        if (chat.chatHistory.length>=chat.maxChatLength)
+        {   
+            chat.chatHistory = sortChat(chat.chatHistory);
+            chat.chatHistory.splice(chat.maxChatLength-1,1);
+            if (chat.chatOffset>0)
+            {
+                chat.chatOffset-=1;
+            }
+        }
+        if (chat.chatOffset>0)
+        {
+            chat.chatOffset+=1;
+        }
+        chat.chatHistory.push(newData);
+
+        //document.getElementById("chat").innerHTML = data.text + '<br>'+document.getElementById("chat").innerHTML;
+        //updateChat()
+    });
+
+    socket.on('playerData',function(data){
+
+    });
+    function getMousePos(event) 
+    {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: (event.clientX - rect.left) / (rect.right - rect.left) * canvas.width,
+            y: (event.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
+        };
+    }
+    function mouseUpdate(event) {
+        mousePosition = getMousePos(event);
+
+
+    }
+    var mouseDown = false;
+    $(document).mousedown(function() {
+        mouseDown = true;
+    }).mouseup(function() {
+        mouseDown = false;  
+    });
+    /*
+    var mouseDown = false;
+    document.body.onmousedown = function() { 
+      mouseDown = true;
+    }
+    document.body.onmouseup = function() {
+      mouseDown = false;
+    }
+    */
+    //document.addEventListener("click", printMousePos);
+    window.addEventListener('mousemove', mouseUpdate, false);
+    $(function() 
+    {
+        $(window).on('wheel', function(e) {
+            var delta = e.originalEvent.deltaY;
+            if (delta < 0)
+            {
+                if (clickedRect(chat.x,chat.y,chat.w,chat.h))
+                {
+                   if (chat.chatOffset<chat.msgs.length-chat.maxWindowLength)
+                    {
+                        chat.chatOffset+=1;
+                    }
+                    refreshChat(); 
+                }
+                
+       
+            }
+            else 
+            {
+                if (clickedRect(chat.x,chat.y,chat.w,chat.h))
+                {
+                    if (chat.chatOffset!=0)
+                        {
+                            chat.chatOffset-=1;
+                        }
+                    refreshChat();
+                }
+        
+            }
+            return false; // this line is only added so the whole page won't scroll in the demo
+        });
+    });
+    function maxDateChat(chatHistory)
+    {
+        var max = {ID:0,date:chatHistory[0].date};
+        for(var i in chatHistory){
+
+            if (chat.chatHistory[i].date > max.date)
+            {
+                max.date = chat.chatHistory[i].date;
+                max.ID = i;
+            }
+        }
+        return max;
+    }
+    function refreshChat()
+    {
+        for(var i in chat.chatHistory)
+        {
+            chat.chatHistory[i].rDate=Date.now();            
+        }
+    }
+    function sortChat(chatHistory)
+    {
+        sortedChatHistory = new Array;
+        var chatLength = chat.chatHistory.length;
+        for (var i = 0; i < chatLength; i++)
+            {
+                maxDateID=maxDateChat(chatHistory).ID;
+                sortedChatHistory.push(chatHistory[maxDateID]);
+                chatHistory.splice(maxDateID,1);
+            }
+        return sortedChatHistory;
+    }
+
+    function clickedAroundRect(x,y,w,h)
+    {
+        return ((mousePosition.x>x-w && mousePosition.x<x+w) && (mousePosition.y>y-h && mousePosition.y<y+h));
+    }
+
+    function clickedRect(x,y,w,h)
+    {
+        return ((mousePosition.x>x && mousePosition.x<x+w) && (mousePosition.y>y && mousePosition.y<y+h));
+    }
+    var holding = false;
+    function moveChat(){
+        if (mouseDown==false)
+        {
+            chat.holdingMove=false;
+        }
+        if (chat.holdingMove == false && mouseDown && clickedAroundRect(chat.x,chat.y,4,4))
+        {
+            chat.startMouse = {};
+            chat.startMouseMoveOffset = JSON.parse(JSON.stringify(mousePosition));
+            chat.startMouseMoveOffset.x=chat.x-chat.startMouseMoveOffset.x;
+            chat.startMouseMoveOffset.y=chat.y-chat.startMouseMoveOffset.y;
+            chat.holdingMove = true;
+        }
+        if (chat.holdingMove == true)
+        {
+            var newPosx = true;
+            var newPosy = true;
+            if (mousePosition.x > canvas.width-1-chat.w)
+            {
+                chat.x = canvas.width-1-chat.w;
+                newPosx = false;
+                //chat.y=mousePosition.y+chat.startMouse.offset.y;
+    
+            }
+            if (mousePosition.x < 1)
+            {
+                chat.x = 1;
+                newPosx = false;
+                //chat.y=mousePosition.y+chat.startMouse.offset.y;
+
+            }
+            if (mousePosition.y > canvas.height-1-chat.h)
+            {
+                chat.y = canvas.height-1-chat.h;
+                newPosy = false;
+                //chat.x=mousePosition.x+chat.startMouse.offset.x;
+    
+            }
+            if (mousePosition.y < 1)
+            {
+                chat.y = 1;
+                newPosy = false;
+                //chat.x=mousePosition.x+chat.startMouse.offset.x;
+
+            }
+            if (newPosx)
+            {
+                chat.x=mousePosition.x+chat.startMouseMoveOffset.x;
+            }
+            if (newPosy)
+            {
+                chat.y=mousePosition.y+chat.startMouseMoveOffset.y;
+            }
+            //console.log("stopped");
+        }
+    }
+    function resizeChat(){
+        if (mouseDown==false)
+        {
+            chat.holdingResize=false;
+        }
+        if (chat.holdingResize == false && mouseDown && clickedAroundRect(chat.x+chat.w,chat.y+chat.h,4,4))
+        {
+            chat.startMouseResizeOffset = {};
+            chat.startMouseResizeOffset.x=chat.x+chat.w-mousePosition.x;
+            chat.startMouseResizeOffset.y=chat.y+chat.h-mousePosition.y;
+
+            chat.holdingResize = true;
+        }
+        if (chat.holdingResize == true)
+        {
+            var newPosx = true;
+            var newPosy = true;
+            if (mousePosition.x > canvas.width-1)
+            {
+                chat.w = canvas.height-chat.x-1;
+                newPosx = false;
+                //chat.y=mousePosition.y+chat.startMouse.offset.y;
+    
+            }
+            if (mousePosition.x < chat.x+10)
+            {
+                chat.w = 10;
+                newPosx = false;
+                //chat.y=mousePosition.y+chat.startMouse.offset.y;
+
+            }
+            if (mousePosition.y > canvas.height-1)
+            {
+                chat.h = canvas.height-chat.y-1;
+                newPosy = false;
+                //chat.x=mousePosition.x+chat.startMouse.offset.x;
+    
+            }
+            if (mousePosition.y < chat.y+10)
+            {
+                chat.h = 10;
+                newPosy = false;
+                //chat.x=mousePosition.x+chat.startMouse.offset.x;
+
+            }
+            if (newPosx)
+            {
+                chat.w=mousePosition.x+chat.startMouseResizeOffset.x-chat.x;
+            }
+            if (newPosy)
+            {
+                chat.h=mousePosition.y+chat.startMouseResizeOffset.y-chat.y;
+            }
+     
+        }
+    }
+    function splitText(msg)
+    {
+        var newMsg;
+        var i = 0;
+        var allowedSpace = chat.w-chat.leftMargin-chat.rightMargin;
+        ctx.font = String(chat.fontSize)+"px "+chat.font;
+
+        newMsg = [msg.substr(0,1)];
+        msg = msg.substr(1);
+        while (true)
+        {   
+            if (msg=="")
+            {
+                break;
+            }
+            if (ctx.measureText(newMsg[i]+msg.substr(0,1)).width<allowedSpace)
+            {
+                newMsg[i] += msg.substr(0,1);
+                msg = msg.substr(1);
+            }
+            else
+            {
+                i++;
+                newMsg[i] = [msg.substr(0,1)];
+                msg = msg.substr(1);
+            }
+        }
+
+        
+        return newMsg
+    }
+    function fillTexts()
+    {
+        
+        for (var i in chat.msgs)
+        {
+
+            if (i<chat.chatOffset)
+            {
+                continue;
+            }
+            if (parseInt(i)-chat.chatOffset>=chat.maxWindowLength){
+                break;
+            }
+            //ctx.fillText(msg[msg.length-parseInt(i)-1],x,chat.y+chat.h-(parseInt(i)+a-chat.chatOffset)*(chat.fontSize+1)-5);
+
+            ctx.fillText(chat.msgs[i],chat.x+chat.leftMargin,chat.y+chat.h-(i-chat.chatOffset)*(chat.fontSize+1)-5);
+
+        }
+
+        return ;
+    }
+    function updateChat(){
+        chat.msgs = new Array;
+        ctx.font = String(chat.fontSize)+"px "+chat.font;
+        ctx.fillStyle = "#000000";
+        ctx.textAlign = "left";
+        chat.chatHistory=sortChat(chat.chatHistory);
+        ctx.beginPath();
+        ctx.rect(chat.x,chat.y,chat.w,chat.h);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(chat.x,chat.y,3,0,2*Math.PI)
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(chat.x+chat.w,chat.y+chat.h,3,0,2*Math.PI)
+        ctx.fill();
+        chat.maxWindowLength=Math.floor(chat.h/(chat.fontSize+1));
+        var a = 0;
+        for(var i in chat.chatHistory){
+            hours = Math.floor(totalSeconds / 3600);
+            //totalSeconds %= 3600;
+            var totalSeconds = Math.floor(chat.chatHistory[i].localDate/1000);
+            seconds = ('0' + totalSeconds % 60).slice(-2);
+            var totalMinutes = Math.floor(totalSeconds/60);
+            minutes = ('0' + totalMinutes % 60).slice(-2);
+            var totalHours = Math.floor(totalMinutes/60);
+            hours = ('0' + (totalHours+GMT) % 24).slice(-2);
+            var timeDisplay = hours + ":" + minutes + ":" + seconds;
+            var msg = (chat.chatHistory[i].PUUID).substring(0,8)+"["+timeDisplay+"]"+": "+chat.chatHistory[i].text;
+            chat.msgs=chat.msgs.concat(splitText(msg).reverse());//,
+            //ctx.fillText(msg,chat.x+chat.leftMargin,chat.y+chat.h-(i-chat.chatOffset)*(chat.fontSize+1)-5);
+            //if (a+1-chat.chatOffset>=chat.maxWindowLength){
+            //    break;
+            //}
+        }
+        if (chat.chatOffset>chat.msgs.length)
+        {
+            //console.log(chat.chatOffset,chat.msgs.length-chat.maxWindowLength)
+            chat.chatOffset=chat.msgs.length-chat.maxWindowLength;
+            //console.log("jaoj");
+        }
+        fillTexts();
+
+        //console.log(chat.msgs);
+    }
+
+
+    function Ping(){
+        var t1=Date.now()
+        socket.emit('ping',{
+                ping:t1
+            });
+        socket.on('ping',function(data){
+            t2=data.ping
+            t3=Date.now()
+        });
+
+        return
+    }
+    function updateFPS(time3){
+        FPS=1000/time3;
+        ctx.font = "14px Consolas";
+        ctx.fillStyle = "#000000";
+        ctx.textAlign = "right";
+        ctx.globalAlpha=1;
+        ctx.fillText(Math.round(FPS),canvas.width,15);
+        
+    }
+
+    function sleep(ms)
+    {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function updatePlayers()
+    {
+
+    }
+    function getRandomInt(max) {
+      return Math.floor(Math.random() * Math.floor(max));
+    }
+
+    setInterval(function(){
+        ctx.fillStyle = "#FFFFFF";
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        updatePlayers();
+
+        moveChat();
+        resizeChat();
+        updateChat();
+
+        time2 = performance.now();
+        time3 = time2 - time1;
+        updateFPS(time3);
+        time1 = performance.now();
+        
+        //gameTick();
+    },1000/FPSlock);
+
+    //gameTick();
+
+
+</script>
+<body onkeypress="keyPress(event)">
+    <div id="chat">
+        
+        <label id="yourname" ></label>
+        <input id="chatinput" type="text">
+        <button onclick="send()">Send</button>
+        <p id="chat"></p>
+        
+    </div><br>
+
+    <a href="https://github.com/vanjavk/Programming/tree/master/Javascript/chat">Source code</a>
+</body>
