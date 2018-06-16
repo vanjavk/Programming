@@ -395,7 +395,7 @@ if(!isset($_SESSION['locations'][$_SESSION['xy'][0].",".$_SESSION['xy'][1]]['cur
 		<div class="container">
             <div class="topleft">
 
-                <a href="https://github.com/vanjavk/Programming/blob/master/php/rpggame">Source code</a>
+                <a href="https://github.com/vanjavk/Programming/tree/master/php/rpggame">Source code</a>
                 <a href="map.json">Map data</a>
                 <a href="enemies.json">Enemy data</a><br>
 <?php
