@@ -14,13 +14,37 @@ function keyPress(event)
 		case 119://w
 			move=-n;
 			break;
+		case 87://w
+			move=-n;
+			break;
+		case 38://w
+			move=-n;
+			break;
 		case 115://s
+			move=n;
+			break;
+		case 83://s
+			move=n;
+			break;
+		case 40://w
 			move=n;
 			break;
 		case 100://d
 			move=1;
 			break;
+		case 68://d
+			move=1;
+			break;
+		case 39://w
+			move=1;
+			break;
 		case 97://a
+			move=-1;
+			break;
+		case 65://a
+			move=-1;
+			break;
+		case 37://w
 			move=-1;
 			break;
 	}

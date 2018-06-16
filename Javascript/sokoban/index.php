@@ -4,10 +4,11 @@
 	<head>
 		<link rel="stylesheet" type="text/css" href="/css/default.css">
 		<meta charset="UTF-8">
-		<title>HTML5</title>
+		<title>Sokoban</title>
 		<script type="text/javascript" src="default.js"></script>
 	</head>
-	<body onload="startGame()" onkeypress="keyPress(event)">
+	<body onload="startGame()" onkeydown="keyPress(event)">
+		<a href="../">back</a><br>
 		<p id="screen" style="color:black">
 			
 		</p>
@@ -35,5 +36,7 @@
 		<a href="https://vanjavk.me/html5/sokoban/?leveldata=8,8:4,4,4,4,4,4,4,4,4,4,0,0,4,4,4,4,4,4,1,2,0,0,4,4,4,4,4,0,4,0,4,4,4,3,4,0,4,0,0,4,4,3,2,0,0,4,0,4,4,3,0,0,0,2,0,4,4,4,4,4,4,4,4,4">Level 4</a>
 		<br>
 		<a href="https://vanjavk.me/html5/sokoban/?leveldata=8,7:4,4,4,4,4,4,4,4,4,4,4,0,0,0,0,4,4,4,4,2,2,2,0,4,4,0,0,2,3,3,0,4,4,1,2,3,3,3,4,4,4,4,4,4,0,0,4,4,4,4,4,4,4,4,4,4">Level 5</a>
+		<br><br>
+		<a href="https://github.com/vanjavk/Programming/blob/master/Javascript/sokoban">Source code</a>
 	</body>
 </html>

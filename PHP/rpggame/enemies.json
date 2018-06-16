@@ -1,0 +1,62 @@
+{
+  "bear": {
+    "name": "Bear",
+    "description": "A mighty bear.",
+    "img": "img/bear.jpg",
+    "lvl": 2,
+    "hp": 20,
+    "minDmg": 1,
+    "maxDmg": 2,
+    "critChance": 0.03,
+    "missChance": 0.20,
+    "items":{"fang":0.5,"tooth":0.3}
+  },
+  "boar": {
+    "name": "Boar",
+    "description": "A wild boar.",
+    "img": "img/boar.jpg",
+    "lvl": 1,
+    "hp": 12,
+    "minDmg": 1,
+    "maxDmg": 2,
+    "critChance": 0.1,
+    "missChance": 0.25,
+    "items":{"tooth":0.3}
+  },
+  "wolf": {
+    "name": "Wolf",
+    "description": "A wolf with sharp teeth.",
+    "img": "img/wolf.jpg",
+    "lvl": 2,
+    "hp": 8,
+    "minDmg": 1,
+    "maxDmg": 3,
+    "critChance": 0.1,
+    "missChance": 0.25,
+    "items":{"fang":0.1,"tooth":0.9}
+  },
+  "reaper": {
+    "name": "Harvest reaper",
+    "description": "Stay off my field you pest.",
+    "img": "img/reaper.jpg",
+    "lvl": 13,
+    "hp": 55,
+    "minDmg": 3,
+    "maxDmg": 7,
+    "critChance": 0.15,
+    "missChance": 0.15,
+    "items":{}
+  },
+  "vulture": {
+    "name": "Vulture fleshripper",
+    "description": "Mmmmm... Flesh of fallen angels.",
+    "img": "img/vulture.jpg",
+    "lvl": 12,
+    "hp": 35,
+    "minDmg": 5,
+    "maxDmg": 10,
+    "critChance": 0.25,
+    "missChance": 0.15,
+    "items":{}
+  }
+}

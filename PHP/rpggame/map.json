@@ -1,0 +1,34 @@
+{
+  "0,0": {
+    "name": "Goldshire inn",
+    "description": "Relax and dance in our inn.",
+    "img": "img/goldshire.jpg",
+    "enemies": [],
+    "info": "Melika Isenstrider greets you!",
+    "quests": []
+  },
+  "1,0": {
+    "name": "Elwynn Forest",
+    "description": "Monsters lurk here.",
+    "img": "img/elwynn.jpg",
+    "enemies": ["bear","boar","wolf"],
+    "info": "You hear a strange sound.",
+    "quests": []
+  },
+  "-1,0": {
+    "name": "Westfall",
+    "description": "Farmers are fightning wild animals.",
+    "img": "img/westfall.jpg",
+    "enemies": ["vulture","reaper"],
+    "info": "You hear a strange mechanical sound.",
+    "quests": []
+  },
+  "-1,-1": {
+    "name": "Sentinel hill",
+    "description": "Everyone is peacefully enjoying sunny weather.",
+    "img": "img/sentinelhill.jpg",
+    "enemies": [],
+    "info": "You hear a welcoming sound.",
+    "quests": []
+  }
+}

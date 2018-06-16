@@ -7,6 +7,7 @@
 		<title>Game of life</title>
 	</head>
 	<body>
+		<a href="../">back</a><br>
 		
 <?php
 function printGrid($n,$m,$aliens){

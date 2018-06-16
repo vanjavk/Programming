@@ -1,0 +1,97 @@
+body, html {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.botleft {
+    width: 25%;
+    height: 30%;
+    float: left;
+    background-color: rosybrown;
+    border-collapse: collapse;
+}
+
+.bot {
+    width: 50%;
+    height: 30%;
+    float: left;
+    background-color: royalblue;
+    border-collapse: collapse;
+}
+.bot1 {
+    width: 50%;
+    height: 100%;
+    float: left;
+    background-color: royalblue;
+    border-collapse: collapse;
+}
+.bot2 {
+    width: 50%;
+    height: 100%;
+    float: right;
+    background-color: #ceb55c;
+    border-collapse: collapse;
+    text-align: center;
+    vertical-align: middle;
+
+}
+
+.botright {
+  width: 25%;
+  height: 30%;
+  position: relative;
+  float: right;
+  background-color: yellow;
+  border-collapse: collapse;
+}
+
+.topleft {
+  width: 25%;
+  height: 70%;
+  border-collapse: collapse;
+  float: left;
+  background-color: #7ca1df;
+}
+#info {
+  width: 100%;
+  height: 100%;
+
+  overflow:scroll;
+}
+.top {
+  width: 50%;
+  height: 70%;
+  float: left;
+  border-collapse: collapse;
+  background-color: #d6dbd9;
+}
+.topright {
+  width: 25%;
+  height: 70%;
+  float: left;
+  border-collapse: collapse;
+}
+
+.topright1 {
+  width: 100%;
+  height: 50%;
+  float: left;
+  border-collapse: collapse;
+  background-color: #f49542;
+}
+
+.topright2 {
+  width: 100%;
+  height: 50%;
+  float: left;
+  position: relative;
+  background-color: #47f441;
+  border-collapse: collapse;
+}

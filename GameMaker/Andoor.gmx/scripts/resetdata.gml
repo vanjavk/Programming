@@ -1,0 +1,33 @@
+ini_open('save.ini')
+    ini_write_string('SLOT1','obl1',0);
+    ini_write_string('SLOT1','obl2',0);
+    ini_write_string('SLOT1','obl3',0);
+    ini_write_string('SLOT1','obl4',0);
+    ini_write_string('SLOT1','obl5',0);
+    ini_write_string('SLOT1','obl6',0);
+    ini_write_string('SLOT1','obl7',0);
+    ini_write_string('SLOT1','obl8',0);
+    ini_write_string('SLOT1','obl9',0);
+    ini_write_string('SLOT1','obl10',0);
+    ini_write_string('SLOT1','obl11',0);
+    ini_write_string('SLOT1','obl12',0);
+    ini_write_string('SLOT1','obl13',0);
+    ini_write_string('SLOT1','obl14',0);
+    ini_write_string('SLOT1','obl15',0);
+ini_close()
+global.obl1=0
+global.obl2=0
+global.obl3=0
+global.obl4=0
+global.obl5=0
+global.obl6=0
+global.obl7=0
+global.obl8=0
+global.obl9=0
+global.obl10=0
+global.obl11=0
+global.obl12=0
+global.obl13=0
+global.obl14=0
+global.obl15=0
+
