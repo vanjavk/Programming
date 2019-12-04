@@ -1,0 +1,1226 @@
+Inductive bool : Type :=
+| true : bool
+| false : bool.
+
+Inductive ocjena : Type :=
+| nedovoljan : ocjena
+| dovoljan : ocjena
+| dobar : ocjena
+| vrlodobar : ocjena
+| izvrstan : ocjena.
+
+Definition negb x :=
+  match x with
+    | true => false
+    | false => true
+  end.
+
+Compute negb (negb true).
+
+Definition andb (x y : bool) : bool :=
+  match x with
+    | true => y
+    | false => false
+  end.
+
+Lemma L1 :
+  negb true = false.
+Proof. simpl. reflexivity. Qed.
+
+
+Lemma idempot_dv_neg (x : bool):
+  negb (negb x) = x.
+Proof.
+  destruct x.
+    - reflexivity.
+    - reflexivity.
+Qed.
+
+Goal forall x, negb (negb x) = x.
+Proof.
+  destruct x; reflexivity.
+Qed.
+
+Proposition komut_konj x y:
+  andb x y = andb y x.
+Proof.
+  destruct x.
+  - destruct y; reflexivity.
+  - destruct y; reflexivity.
+Qed.
+
+Proposition komut_konj2 x y:
+andb x y = andb y x.
+Proof.
+  destruct x, y ; reflexivity.
+Qed.
+
+(* Prva zadaca *)
+
+(*1*)
+
+Definition orb ( x y : bool) : bool :=
+  match x with
+    | true => true
+    | false => y
+  end.
+(*a*)
+Proposition komut_dis x y:
+  orb x y = orb y x.
+Proof.
+  destruct x, y ; reflexivity.
+Qed.
+(*b*)
+Proposition de_morg x y:
+  negb ( orb x y ) = andb (negb x) (negb y).
+Proof.
+  destruct x, y ; reflexivity.
+Qed.
+
+(*2*)
+
+Lemma com_x (x : nat) :
+  x+0=x.
+Proof.
+  induction x.
+  - simpl. reflexivity. 
+  - simpl. rewrite IHx. reflexivity.
+Qed. 
+Lemma com_S  (x y : nat) :
+  x + S y = S (x+y).
+Proof.
+  induction x.
+  -simpl. reflexivity.
+  - simpl. rewrite IHx. reflexivity.
+Qed. 
+Lemma com_nat (x y : nat) :
+  x+y=y+x.
+Proof.
+  symmetry. induction y.
+  -simpl. rewrite com_x. reflexivity.
+  -simpl. rewrite IHy. rewrite com_S. reflexivity.
+Qed.
+
+(*3*)
+
+Fixpoint mult (n m : nat) : nat :=
+  match n with
+    | O => O
+    | S n' => plus m (mult n' m)
+  end.
+Fixpoint pow (base power : nat) : nat :=
+  match power with
+    | O => S O
+    | S p => mult base (pow base p)
+  end.
+
+(*4*)
+
+(*a*)
+Proposition assoc_plus x y z:
+  plus x (plus y z) = plus (plus x y) z.
+Proof.
+  Require Import Omega. omega.
+Qed.
+Proposition dist x y z :
+  mult ( plus x y) z = plus (mult x z) (mult y z).
+Proof.
+  induction x.
+  - simpl. reflexivity.
+  - simpl. rewrite IHx. rewrite assoc_plus. reflexivity.
+Qed. 
+(*b*)
+Proposition assoc_mult x y z:
+  mult ( mult x y) z = mult x ( mult y z).
+Proof.
+  induction x. simpl. reflexivity.
+  -simpl. rewrite dist. omega.
+Qed.
+(*c*)
+Lemma add_O x :
+  x+0=x.
+Proof.
+  induction x.
+  -simpl. reflexivity.
+  -simpl. rewrite IHx. reflexivity.
+Qed.
+Proposition pot x m n :
+  x^(m+n)= x^m*x^n.
+Proof.
+  induction m,n. simpl. reflexivity.
+  - simpl. rewrite add_O. reflexivity.
+  - simpl. rewrite add_O. omega.
+  - simpl. rewrite IHm. simpl. rewrite assoc_mult. reflexivity.
+Qed.
+(* 5. *)
+Proposition mult_x x :
+  mult (mult x x) x = mult x (mult x x).
+Proof.
+  rewrite assoc_mult. reflexivity.
+Qed.
+
+(* Druga zadaca *)
+
+Require Import Omega.
+(*1*)
+Fixpoint iter (n : nat) {X} (f : X -> X) (x : X) : X  :=
+match n with
+| O => x
+| S n' => f (iter n' f x)
+end.
+(*a*)
+Proposition one x y :
+  mult x y = iter x (plus y) 0.
+Proof.
+  induction x ; simpl. reflexivity.
+  - rewrite IHx. reflexivity.
+Qed. 
+(*b*)
+Proposition two  x n :
+   x^n = iter n (mult x) 1.
+Proof.
+  induction n ; simpl. reflexivity.
+  - rewrite IHn. reflexivity.
+Qed.
+(*2*)
+Fixpoint fact (n:nat) : nat :=
+  match n with
+    | O => 1
+    | S n => S n * fact n
+  end.
+
+
+Definition step ( n : nat * nat ): (nat * nat) :=
+  match n with
+    | (x, y) => (S x, (S x) * y)
+  end.
+
+Lemma it_fac(x : nat):
+   (x, fact x) = iter x step (0, 1).
+Proof.
+  symmetry. induction x ; simpl. reflexivity.
+  - rewrite IHx . reflexivity.
+Qed.
+
+(*3*)
+Definition car {x y z : Type} (f : (x -> y -> z)) (q : x * y) : z :=
+  match q with
+    (x, y) => f x y
+  end.
+Definition cas {x y z : Type} (f : (x * y -> z)) (p : x)(q : y) : z :=
+  f (p,q).
+(*a*)
+Lemma car_f {x y z : Type} (f:(x -> y -> z)) (p : x)(q : y):
+  car f (p,q) = f p q.
+Proof.
+  simpl. reflexivity.
+Qed.
+(*b*)
+Lemma cas_f {x y z : Type} (f:(x*y->z)) (p:x)(q:y):
+  cas f p q = f (p,q).
+Proof.
+  reflexivity.
+Qed. 
+
+(*4*)
+
+Open Scope list_scope.
+Notation "[]" := nil (format "[]") : list_scope.
+Fixpoint map {A B : Type}(f:(A->B)) (l:list A) : list B :=
+    match l with
+    | [] => []
+    | x :: xs => (f x) :: (map f xs)
+    end.
+(*a*)
+Definition map_inc (l : list nat): list nat:=
+  map (plus 1) l.
+Fixpoint sub (n m : nat) : nat :=
+  match n, m with
+  | S k, S l => k - l
+  | _, _ => n
+  end.
+Definition map_dec ( l : list nat) : list nat:=
+  map (sub 1) l.
+(*b*)
+Fixpoint divmod x y q u :=
+  match x with
+    | 0 => (q,u)
+    | S x' => match u with
+                | 0 => divmod x' y (S q) y
+                | S u' => divmod x' y q u' 
+              end
+  end.
+Definition modulo x y :=
+  match y with
+    | 0 => y
+    | S y' => y' - snd (divmod x y' 0 y')
+  end.
+Fixpoint mod_3 (x : nat): bool :=
+  match (modulo x 3) with
+    | 0 => true
+    | _ => false
+  end.
+Definition map_i2b(l : list nat): list bool:=
+  map mod_3 l.
+Notation "[ x ; y ; .. ; z ]" := (cons x (cons y .. (cons z nil) ..)) : list_scope.
+Compute map_i2b([1;2;3;4;5;6;7]).
+
+(*5*)
+
+Fixpoint foldl{X Y : Type} (f : (Y -> X -> Y))
+  (y: Y) (l : list X) : Y:=
+
+  match l with
+    | [] => y
+    | x :: xs => f (foldl f y xs) x
+  end.
+(*a*)
+Definition flen{x : Type}(l : list x) : nat :=
+  foldl (fun x _ => x + 1) 0 l.
+(*b*)
+Definition fsum(l : list nat) : nat :=
+  foldl plus 0 l.
+
+(* Treca zadaca *)
+
+Require Import Omega.
+Require Import Arith.
+Require Import List.
+Import ListNotations.
+Set Implicit Arguments.
+(*1*)
+
+(*a*)
+Fixpoint tail_plus (x y : nat) : nat :=
+  match x with
+    | O => y
+    | S x => tail_plus x (S y)
+  end.
+Lemma S_n n m:
+  S (n+m) = n + S m.
+Proof.
+  induction n. reflexivity.
+  -simpl. rewrite IHn. reflexivity.
+Qed.
+Lemma plus_tail_plus : forall n m, plus n m = tail_plus n m.
+Proof.
+   induction n.  reflexivity. 
+  -simpl. intros m.  rewrite <- IHn. rewrite S_n. reflexivity. 
+Qed.
+(*b*)
+Fixpoint fac (n : nat) : nat :=
+  match n with
+    | O => 1
+    | S n' => mult n (fac n')
+  end.
+
+Fixpoint fact(n:nat) (x:nat) :=
+  match n with
+    | 0 => x
+    | S k => fact k (n * x) 
+  end.
+
+Definition fact_1 (n:nat):=
+  fact n 1.
+
+Lemma to_rewrite: 
+  forall n x , fact n x =mult (fac n) x.
+Proof.
+  intros n. induction n as [ | n' ns']; intros n; simpl.
+    - omega.
+    - rewrite ns'. ring.
+Qed.
+
+Proposition fac_fact_eq n:
+  fact_1 n = fac n. 
+Proof.
+  unfold fact_1. rewrite to_rewrite. omega.      
+Qed.
+(*2*) 
+Fixpoint map (X Y : Type) (f : X -> Y) (l : list X) : list Y :=
+  match l with
+    | [] => []
+    | x :: xs => f x :: map f xs
+  end.
+
+Lemma map_dist (X Y : Type) (p q : list X) (f : X -> Y) :
+  map f (p ++ q) = map f p ++ map f q.
+Proof.
+   induction p; simpl.
+  - reflexivity.
+  - rewrite IHp. reflexivity.
+Qed.
+(*3*)
+Fixpoint foldl{X Y : Type} (f : (Y -> X -> Y))
+  (y: Y) (l : list X) : Y:=
+
+  match l with
+    | [] => y
+    | x :: xs => f (foldl f y xs) x
+  end.
+(*a*)
+Definition flen_f (X : Type) (m : nat) (x : X) : nat := 1 + m.
+
+Arguments flen_f {X}.
+Definition flen (X : Type) (l : list X) : nat := 
+  foldl flen_f 0 l.
+Fixpoint length (X : Type)(l:list X) : nat :=
+    match l with
+      | nil => 0
+      | _ :: m => S (length m)
+    end.
+Lemma len_flen_eq (X : Type) (l : list X) :
+  length l = flen l.
+Proof.
+  induction l .
+  - reflexivity.
+  - simpl. destruct l. reflexivity. rewrite IHl . auto.
+Qed.
+(*b*)
+Fixpoint foldr (X Y : Type) (f : X -> Y -> Y) (y : Y) (l : list X) : Y :=
+match l with
+| [] => y
+| x :: xs => f x (foldr f y xs) 
+end.
+
+Definition flenr (X : Type) (l : list X) : nat := 
+  foldr (fun _ m => 1 + m) 0 l.
+
+Lemma flenr_1 (X : Type) (x : X) (xs : list X) :
+  flenr (x :: xs) = 1 + flenr (xs).
+Proof.
+  revert x. destruct xs as [ | y ys].
+  - reflexivity.
+  - intros x. unfold flenr. simpl. reflexivity.
+Qed.
+
+Lemma flen_flenr_eq (l : list nat) :
+  flen l = flenr l.
+Proof.
+  induction l. reflexivity.
+  - rewrite flenr_1. rewrite <- IHl. simpl. auto.
+Qed.
+
+(*c*)
+Lemma len_flenr_eq (l : list nat) :
+  length l = flenr l.
+Proof.
+  induction l. reflexivity.
+  - simpl. rewrite IHl. auto.
+Qed.
+
+(*5*)
+(*a*)
+Goal forall X Y : Prop, X -> Y -> X.
+Proof.
+  intros X Y A B. apply A. Show Proof.
+Qed.
+(*b*)
+Goal forall X Y Z : Prop, (X -> Y -> Z) -> (X -> Y) -> X -> Z.
+Proof.
+  intros X Y Z A B C.
+  apply A. apply C. apply B. apply C. Show Proof.
+Qed.
+(*c*)
+Goal forall X Y : Prop, (forall Z : Prop, (X -> Y -> Z) -> Z) -> X.
+Proof.
+  intros X Y A.
+  apply A. intros B C. apply B. Show Proof. 
+Qed.
+
+(* Cetvrta zadaca *)
+
+Require Import Omega.
+Require Import Classical_Prop.
+(*1*)
+
+Goal forall X : Prop, ~~~X -> ~X.
+Proof.
+  intros x y z. apply y. intros A. apply A. exact z.
+Qed.
+
+Goal forall X Y : Prop, (X -> Y) -> ~Y -> ~X.
+Proof.
+  intros x y A B C. apply B. apply A. exact C.
+Qed.
+
+Goal forall X : Prop, (X -> False) -> (~X -> False) -> False.
+Proof.
+  intros x y A. apply A. intros B. apply y. exact B. 
+Qed.
+
+Goal forall X Y : Prop, (forall Z : Prop, (X -> Y -> Z) -> Z) -> Y.
+Proof.
+  intros x y A. apply A. intros B C. exact C. 
+Qed.
+
+(*2*)
+
+Goal forall X Y Z : Prop, X /\ (Y \/ Z) -> X /\ Y \/ X /\ Z.
+Proof.
+  intros x y z H. destruct H. destruct H0. left. split. 
+  exact H. apply H0. right. split. apply H. apply H0.
+Qed.
+
+Goal forall X Y Z : Prop, X \/ (Y /\ Z) -> (X \/ Y) /\ (X \/ Z).
+Proof.
+  intros x y z A . destruct A. split ; left ; apply H. 
+  destruct H. split ; right. exact H. exact H0.
+Qed.
+
+Goal forall X Y : Prop, X \/ (X /\ Y) <-> X.
+Proof.
+  intros x y. split; intros A. destruct A ; apply H. left. exact A.
+Qed.
+
+Goal forall X Y : Prop, X /\ (X \/ Y) <-> X.
+Proof.
+  intros x y. split; intros A. destruct A. exact H.
+  split. exact A. left. exact A.
+Qed.
+
+(*3*)
+
+Goal forall (X : Type) (x y : X), (forall p : X -> Prop, p x -> p y) -> (forall p : X -> Prop, p y -> p x).
+Proof.
+  intros X x y A B. apply A. intros C. apply C.
+Qed.
+
+(*4*)
+
+Goal forall X Y (p: X -> Y -> Prop), (exists y x, p x y) -> exists x y, p y x.
+Proof.
+  intros X Y A B. apply B.
+Qed.
+
+Goal forall (X Y : Prop) (p : X -> Prop), (forall x, p x -> Y) <-> ((exists x, p x) -> Y).
+Proof.
+  intros X Y A. split. 
+  - intros B C. destruct C. revert H. apply B. 
+  - intros B C D. apply B. exists C. exact D.
+Qed.
+
+Goal forall (X Y : Prop), (X -> Y) <-> ((exists x : X, True) -> Y).
+Proof.
+  intros X Y. split.
+  - intros A B. apply A. apply B. 
+  - intros A B. apply A. exists B. reflexivity.
+Qed.
+
+(*5*)
+
+Goal False <-> forall Z : Prop, Z.
+Proof.
+  split.
+  -intros A . exfalso. exact A. 
+  -intros A. apply A. 
+Qed.
+
+Goal forall X Y : Prop, X /\ Y <-> forall Z : Prop, (X -> Y -> Z) -> Z.
+Proof.
+  intros X Y. split. 
+  -intros A B C. destruct A. apply C. exact H. exact H0.
+  -intros A. apply A. split. exact H. exact H0.
+Qed.
+
+Goal forall X Y : Prop, X \/ Y <-> forall Z : Prop, (X -> Z) -> (Y -> Z) -> Z.
+Proof.
+  intros X Y. split.
+  - intros A B C D. destruct A. apply C. exact H. apply D. exact H.
+  - intros A. apply A. left. exact H. right. exact H.
+Qed.
+
+Goal forall (X : Type) (p : X -> Prop), (exists x, p x) <-> forall Z : Prop, (forall x, p x -> Z) -> Z.
+Proof.
+  intros X Y. split.
+  - intros A B. destruct A. intros C. revert H. apply C.
+  - intros A. apply A. intros B C. exists B. exact C. 
+Qed.
+
+(*6*)
+
+Goal forall (X : Type) (p : X -> Prop), ~(exists x, p x) <-> forall x, ~ p x.
+Proof.
+  intros X Y . split.
+  - intros A B C. apply A. exists B. exact C.
+  - intros A B. destruct B. revert H. apply A.
+Qed.
+
+Goal forall (X : Type) (p : X -> Prop), (exists x, ~ p x) -> ~ (forall x, p x).
+Proof.
+  intros X Y A B. destruct A. apply H. apply B.
+Qed.
+
+(*7*)
+Goal forall X : Prop, ~~(X \/ ~X).
+Proof.
+  unfold not. intros X A. apply A. right. intro B.
+  apply A. left. apply B.
+Qed.
+Goal forall X Y : Prop, ~~(((X -> Y) -> X) -> X).
+Proof.
+  unfold not. intros X Y A. apply A. intros B.
+  apply B. intros C. destruct A. intros D. exact C.
+Qed. 
+
+Goal forall X Y: Prop, ~~(~(X /\ Y) <-> ~X \/ ~ Y).
+Proof.
+  intros X Y A.  apply A.  split.
+  - intros B. right. intros C. apply B. destruct A. split. 
+    intros D. left. intros E. apply B. split. 
+    exact E. exact C. intros D. apply B.
+  - intros P. destruct P. intros Z. apply H. 
+    apply Z. intros Z. apply H. apply Z.
+Qed.
+
+Goal forall X Y : Prop, ~~ ((X -> Y) <-> (~ Y -> ~ X)).
+Proof.
+  intros X Y A. apply A. split. 
+  - intros B. intros C D. apply C. apply B. exact D.
+  - unfold not. intros P Q. exfalso. apply P. intros Z. apply A.
+    split. intros B. intros C D. apply C. apply B. exact D.
+    intros M N. exact Z. exact Q.
+Qed.
+
+(*8*)
+
+Definition XM := forall X : Prop, X \/ ~ X.
+Definition DN := forall X : Prop, ~~X -> X.
+Definition CP := forall X Y : Prop, (~Y -> ~X) -> X -> Y.
+Definition Peirc := forall X Y : Prop, ((X -> Y) -> X) -> X.
+
+Goal XM -> DN.
+Proof. 
+  unfold XM, DN. intros H. tauto.
+Qed.
+
+Goal DN -> CP.
+Proof.
+  unfold DN, CP. intros A B C D E. apply A. intuition.
+Qed.
+
+Goal CP -> Peirc.
+Proof.
+  unfold CP, Peirc. intros A B C D.  tauto.
+Qed.
+
+Goal Peirc -> XM.
+Proof.
+  unfold Peirc, XM. intros A B. tauto.
+Qed.
+
+(*9*)
+
+Definition b2p (x : bool) : Prop :=
+  match x with
+  | true => True
+  | false => False
+  end. 
+
+Lemma disjoint_bool_1: false <> true.
+Proof.
+  auto.
+Qed.
+
+Lemma disjoint_bool_2: true <> false.
+Proof.
+  intuition.
+Qed.
+
+Goal forall (x y : bool), x = y \/ x <> y.
+Proof.
+   intros X Y. tauto.
+Qed.
+
+Goal forall (X: Type) (x y: X), x <> y <-> exists (R: X -> X -> Prop), ~ R x y /\ forall z, R z z.
+Proof.
+  intros X x y. split.
+  - exists (fun x y => x=y). split. exact H. reflexivity.
+  - intros A B. destruct A. apply H.  
+    destruct B. apply H.
+Qed.
+
+(*10*)
+
+Set Implicit Arguments.
+
+Definition eq (X : Type) (x y : X) : Prop := forall p: X -> Prop, p x -> p y.
+
+Lemma eq_reflexivity : forall (X : Type), forall (x : X), eq x x.
+Proof.
+  intros X x. unfold eq. intros A B. exact B.
+Qed.
+
+Lemma eq_symmetry : forall X : Type, forall x y : X, eq x y -> eq y x.
+Proof.
+  intros X x y. unfold eq. intros A B. apply A. intros C. exact C. 
+Qed.
+
+Lemma eq_transitivity: forall X: Type, forall x y z: X, eq x y -> eq y z -> eq x z.
+Proof.
+  intros X x y z. unfold eq. intros A B C. apply B. apply A.
+Qed.
+
+Lemma rewrite: forall (X: Type), forall x y: X, forall p: X -> Prop, eq x y -> p y -> p x.
+Proof.
+  intros X x y. unfold eq. intros A B. apply B. intros C. exact C.
+Qed.
+
+(* Peta zadaca *)
+
+Set Implicit Arguments.
+Require Import List.
+Import ListNotations.
+
+(*1*)
+Goal forall (X : Type) (x y : X) (A B : list X),
+  x :: A = y :: B -> x = y /\ A = B.
+Proof.
+  intros X x y A B H. split; injection H.
+  - intros _ E. exact E.
+  - intros E _. exact E.
+Qed.
+
+(*2*)
+
+Definition eq (X : Type) (x y : X) : Prop := forall p: X -> Prop, p x -> p y.
+
+Goal ~eq True False.
+Proof.
+  unfold eq. intros A. exact ((A (fun X => X)) I). 
+Qed.
+
+Goal ~eq true false.
+Proof.
+  unfold eq. intros A. 
+  change (if false then True else False).
+  apply A. exact I.
+Qed.
+
+Goal forall x, ~ eq (S x) O.
+Proof.
+  unfold eq. intros x A. 
+  specialize (A (fun n => match n with O => False | _ => True end)).
+  exact (A I).
+Qed.
+
+Goal forall x y, eq (S x) (S y) -> eq x y.
+Proof.
+  unfold eq. intros x y A p.
+  specialize (A (fun y => S x = y)). injection A.
+  - intros B C. rewrite <- B. exact C.
+  - reflexivity.
+Qed.
+
+Goal forall (X : Type) (x y : X), ~eq x y <-> exists p, p x /\ ~p y.
+Proof.
+  intros X x y. unfold eq. split. 
+  - intros A. exists (fun y => x = y). split.
+    -- reflexivity.
+    -- intros B. apply A. intros p C. rewrite <- B. exact C.
+  - intros [p [A B]] C. apply B, C, A.
+Qed.
+
+(*3*)
+
+Goal exists (f : nat -> nat -> nat) (x : nat), (fun x => f x x) <> f x.
+Proof.
+  exists (fun x y => S x), O. intros H.
+  assert (A : 2 <> 1). { auto. } apply A.
+  change ((fun x : nat => S x) 1 = (fun _ : nat => 1) 1).
+  rewrite H. reflexivity.
+Qed.
+
+(*4*)
+Notation "x == y" := (eq x y) (at level 70, no associativity).
+
+Goal forall (X : Type) (x y : X) (p : X -> Prop), x == y -> p y -> p x.
+Proof.
+  intros X x y.
+  assert (x == y -> x = y).
+  { 
+    unfold eq. intros A. apply (A (fun z => x = z)). reflexivity.
+  }
+  intros p A py. rewrite H; assumption.
+Qed.
+
+Goal forall (X : Type) (x y : X) (p : X -> Prop), x == y -> p x -> p y.
+Proof.
+  intros X x y.
+  assert (x == y -> y = x).
+  { 
+    unfold eq. intros A. apply (A (fun z => z = x)). reflexivity.
+  }
+  intros p A px. rewrite H; assumption.
+Qed.
+
+(* bool <> False *)
+
+Goal bool <> False.
+Proof.
+  pose (p X := (exists _ : X, True)). intros H.
+  assert (A : ~p False). { intros [b _]. exact b. }
+  apply A. rewrite <- H. exists true. exact I.
+Qed.
+
+(*6*)
+
+Definition injective (X Y : Type) (f : X-> Y) : Prop := forall x x' : X, f x = f x' -> x = x'.
+
+Goal forall X Y : Type, forall f : X -> Y, (exists g : Y -> X, forall x, g (f x) = x) -> injective f.
+Proof.
+  unfold injective. intros X Y f [g A] x x' B. rewrite <- A. rewrite <- B. rewrite A. reflexivity.
+Qed.
+
+(* Sesta zadaca *)
+
+Set Implicit Arguments.
+Require Import List.
+Import ListNotations.
+
+Definition nat_ind
+  (p : nat -> Prop)
+  (basis : p 0)
+  (step : forall n, p n -> p (S n))
+  : forall n, p n :=
+    fix f n := match n return p n with
+      | 0 => basis
+      | S n => step n (f n)
+    end.
+
+Goal forall n m, n + S m = S (n + m).
+Proof.
+  intros n m. revert n.
+  apply (nat_ind (fun n => n + S m = S (n + m))); simpl.
+  - reflexivity.
+  - intros n IHn. f_equal. exact IHn.
+  Show Proof.
+Qed.
+
+Definition list_ind 
+  (X : Type) 
+  (p : list X -> Prop) 
+  (basis : p []) 
+  (step : forall (x : X) (A : list X), p A -> p (x :: A))
+  : forall (A : list X), p A := 
+    fix f A := match A return p A with
+      | [] => basis
+      | a :: A => step a A (f A)
+    end.
+
+Goal forall (X : Type) (A B C : list X), (A ++ B) ++ C = A ++ (B ++ C).
+Proof.
+  intros X A B C. revert A.
+  apply (list_ind (fun A => (A ++ B) ++ C = A ++ (B ++ C))); simpl.
+  - reflexivity.
+  - intros x L IHL. f_equal. exact IHL.
+Qed.
+
+Definition prec (p : nat -> Type) (x : p 0) (f : forall n, p n -> p (S n)) : forall
+n, p n :=
+  fix F n := match n return p n with
+    | 0 => x
+    | S n' => f n' (F n')
+  end.
+
+
+Goal forall n m, n + S m = S (n + m).
+Proof.
+  intros n m. revert n.
+  apply (prec (fun n => n + S m = S (n + m))); simpl.
+  - reflexivity.
+  - intros n IHn. f_equal. exact IHn.
+Qed.
+
+Definition psum (x y : nat) := prec (fun _ => nat) x (fun n => fun z => S z) y.
+
+Definition pprod (x y : nat) := prec (fun _ => nat) 0 (fun n => fun z => z + x) y.
+
+Definition pfac (x : nat) := prec (fun _ => nat) 1 (fun n => fun z => z * S n) x.
+
+Require Import Omega.
+
+Goal forall (x y : nat), x * y = pprod x y.
+Proof.
+  intros x y. revert y.
+  induction y; simpl.
+  - omega.
+  - rewrite <- IHy. auto.
+Qed.
+
+Fixpoint fac (x : nat) : nat :=
+  match x with 
+    | 0 => 1
+    | S x' => x * fac x'
+  end.
+
+Goal forall x : nat, fac x = pfac x.
+Proof.
+  induction x; simpl.
+  - trivial.
+  - rewrite <- IHx. assert (A : forall m n, m * S n = m + m * n).
+    {
+      intros m n. revert m. induction m; simpl.
+      - reflexivity. 
+      - rewrite IHm. f_equal. omega.
+    }
+    rewrite A. f_equal. rewrite mult_comm. reflexivity.
+Qed.
+
+Definition ppred (x : nat) := prec (fun _ => nat) 0 (fun n => fun _ => n) x.
+
+Lemma size_induction X (f : X -> nat) (p : X -> Prop) :
+  (forall x, (forall y, f y < f x -> p y) -> p x) -> forall x, p x.
+Proof.
+  intros step x. apply step.
+  assert (G: forall n y, f y < n -> p y).
+  { 
+    intros n. induction n.
+    - intros y B. exfalso. omega.
+    - intros y B. apply step. intros z C. apply IHn. omega. 
+   }
+  apply G.
+Qed.
+
+Lemma complete_induction (p : nat -> Prop) :
+  (forall x, (forall y, y < x -> p y) -> p x) -> forall x, p x.
+Proof.
+  apply (size_induction (fun y => y) p).
+Qed.
+
+Definition multiplication (f : nat -> nat -> nat) : Prop :=
+  forall x y, f x 0 = 0 /\ f x (S y) = x + f x y.
+
+Goal multiplication mult.
+Proof.
+  unfold multiplication. intros x y. split.
+  - omega.
+  - induction x. omega. simpl. rewrite IHx. omega.
+Qed.
+
+Goal forall f g, multiplication f -> multiplication g -> forall x y, f x y = g x y.
+Proof.
+  intros f g Mf Mg x y. revert x. induction y; intros x.
+  - destruct (Mf x 0) as [A _]. destruct (Mg x 0) as [B _]. rewrite A, B. reflexivity.
+  - destruct (Mf x y) as [_ A]. destruct (Mg x y) as [_ B]. rewrite A, B. rewrite IHy. reflexivity. 
+Qed.
+
+(* Sedma zadaca *)
+
+Set Implicit Arguments.
+
+Definition TVS : Prop := forall X : Prop, 
+  X = True \/ X = False.
+
+Definition XM : Prop := forall X : Prop, 
+  X \/ ~X.
+
+Definition PI : Prop := forall (X : Prop) (A B : X),
+  A = B.
+
+Definition PE : Prop := forall (X Y : Prop),
+  (X <-> Y) -> X = Y.
+
+Lemma l1 : TVS -> XM.
+Proof.
+  intros A X. destruct (A X) as [B | B]; rewrite B; auto.
+Qed.
+
+Lemma l2 : TVS -> PE.
+Proof.
+  intros A X Y B. destruct (A X), (A Y); subst X Y; tauto.
+Qed.
+
+Lemma l3 : XM -> PE -> TVS.
+Proof.
+  intros xm pe X. destruct (xm X) as [A | A].
+  - left. apply pe. tauto.
+  - right. apply pe. tauto.
+Qed.
+
+(*1*)
+
+Goal TVS <-> XM /\ PE.
+Proof. 
+  split.
+  - intros tvs. split.
+    -- apply l1. exact tvs.
+    -- apply l2. exact tvs.
+  - intros [xm pe]. apply l3. 
+    -- exact xm.
+    -- exact pe.
+Qed.
+
+(* 2 bez automacije i subst *)
+
+Goal TVS -> PE.
+Proof.
+  intros A X Y B. destruct (A X) as [C | C], (A Y) as [D | D].
+  - rewrite C, D. reflexivity.
+  - exfalso. rewrite <- D. apply B. rewrite C. exact I.
+  - exfalso. rewrite <- C. apply B. rewrite D. exact I.
+  - rewrite C, D. reflexivity.
+Qed.
+
+
+(* 3 bez automacije, pomocu discriminate *)
+
+Definition surjective (X Y : Type) (f : X -> Y) : Prop := forall y, exists x, f x = y.
+
+Goal forall X (f : X -> bool), surjective f -> exists x y : X, x <> y.
+Proof.
+  intros X f A.
+  assert (B : exists x, f x = true). { exact (A true). } destruct B as [x H1].
+  assert (C : exists x, f x = false). { exact (A false). } destruct C as [y H2].
+  exists x, y. intros B. subst x. rewrite H1 in H2. discriminate H2.
+Qed.
+
+(*4*)
+
+Definition ISO (X Y : Type) : Prop :=
+  exists f : X -> Y, exists g : Y -> X, forall x y,
+  g (f x) = x /\ f (g y) = y.
+
+Definition PU : Prop := forall (X Y : Prop), ISO X Y -> X = Y.
+
+(*a*)
+
+Lemma l4 : PE -> PU.
+Proof.
+  intros pe X Y [f [g _]]. apply pe. split.
+  - exact f.
+  - exact g.
+Qed.
+
+(*b*)
+
+Lemma l5 : PU -> PI -> PE.
+Proof.
+  intros pu pi X Y [f g]. apply (pu X Y). exists f, g. intros x y. split.
+  - apply (pi X (g (f x)) x).
+  - apply (pi Y (f (g y)) y).
+Qed.
+
+(*c*)
+
+Inductive bp : Prop := P1 : bp | P2 : bp.
+
+Lemma sur_fixpoint X Y (f : X -> X -> Y) (g : Y -> Y) : surjective f -> exists y, g y = y.
+Proof.
+  intros A. pose (h x := g (f x x)). destruct (A h) as [x B]. exists (h x). unfold h at 2. rewrite <- B. reflexivity.
+Qed.
+
+Lemma l6 : PE -> PI.
+Proof.
+  intros pe.
+  cut (P1 = P2).
+  { 
+    intros A X B C.
+    change (B = match P1 with P1 => C | P2 => B end).
+    rewrite A. reflexivity. 
+  }
+  pose (neg x := match x with P1 => P2 | P2 => P1 end).
+  cut (exists P, neg P = P).
+  {
+    unfold neg. intros [[ | ] C].
+    - symmetry. exact C.
+    - exact C. 
+  }
+  cut (exists f : bp -> bp -> bp, surjective f).
+  {
+    intros [f A]. apply (sur_fixpoint (f := f)). exact A. 
+  }
+  cut (bp = (bp -> bp)).
+  {
+    intros A. rewrite <- A. exists (fun x => x). intros x. exists x. reflexivity. 
+  }
+  apply pe. split ; auto using P1.
+Qed.
+
+Goal PE <-> PU /\ PI.
+Proof.
+  split. 
+  - intros pe. split.
+    -- apply l4. exact pe.
+    -- apply l6. exact pe.
+  - intros [pu pi]. apply l5. 
+    -- exact pu.
+    -- exact pi.
+Qed.
+
+
+(*5*)
+
+(*a*)
+Goal PE -> (forall X : Prop, X -> X = True).
+Proof.
+  intros pe X x. apply (pe X True). split; intros _.
+  - exact I.
+  - exact x.
+Qed.
+
+(*b*)
+Goal (forall X : Prop, X -> X = True) -> P1 = P2.
+Proof.
+  intros A.
+  assert (H : bp = True) by (exact ((A bp) P1)).
+  cut (forall x y : bp, x = y). { intros B. exact (B P1 P2). }
+  rewrite H. intros x y. rewrite x, y. reflexivity.
+Qed.
+
+
+(*6*)
+
+Definition sys (f : nat -> nat) : Prop :=
+  f 0 = 0 /\ forall x, f (S x) = S (f (f x)).
+
+Goal sys (fun x => x).
+Proof.
+  split; reflexivity.
+Qed.
+
+Goal forall f g, sys f -> sys g -> forall x, f x = g x.
+Proof.  
+  assert (A : forall f, sys f -> forall x, f x = x).
+  {
+    intros f [f0 fx]. induction x.
+    - exact f0.
+    - rewrite fx, IHx, IHx. reflexivity.
+  }
+  intros f g sf sg x.
+  rewrite (A f), (A g). reflexivity. exact sg. exact sf.
+Qed.
+
+(* Osma zadaca *)
+
+Require Import Coq.Arith.Compare_dec.
+
+Definition min (x y : nat) : nat := if (le_dec x y) then x else y.
+
+Compute (min 2 3).
+Compute (min 5 5).
+Compute (min 6 3).
+
+(*1*)
+
+Goal forall X Y : Prop, {X} + {Y} -> X \/ Y.
+Proof.
+  intros X Y [x | y]; auto.
+Qed.
+
+(*2*)
+
+Goal forall x y, if le_dec x y then x <= y else ~(x <= y).
+Proof.
+  intros x y. destruct le_dec; auto.
+Qed.
+
+Goal forall x y, if le_dec x y then x <= y else x > y.
+Proof.
+  intros x y. destruct le_dec as [A | A].
+  - exact A.
+  - apply not_le. exact A.
+Qed.
+
+(*3*)
+
+Definition dec (X : Prop) : Type := {X} + {~X}. 
+
+Goal forall X : Type, X -> inhabited X.
+Proof.
+  intros X x. constructor. exact x.
+Qed.
+
+Goal forall X Y : Prop, X \/ Y -> inhabited ({X} + {Y}).
+Proof.
+  intros X Y [x | y]; constructor; auto.
+Qed.
+
+Goal forall X : Prop, dec X -> X \/ ~X.
+Proof.
+  intros X [A | A]; auto.
+Qed.
+
+(*4*)
+
+Goal forall X : Prop, inhabited X -> dec X.
+Proof.
+  intros. left. apply H.
+Qed.
+
+Goal forall X : Prop, dec X -> dec (inhabited X).
+Proof.
+  intros X [x | nx].
+  - left. constructor. exact x.
+  - right. intros [x]. exact (nx x).
+Qed.
+
+Goal forall X : Prop, dec (inhabited X) -> dec X.
+Proof.
+  intros X [A | A]. 
+  - left. destruct A. exact H.
+  - right. intros x. apply A. constructor. exact x.
+Qed.
+
+(*5*)
+
+Definition or_dec (X Y : Prop) : dec X -> dec Y -> dec (X \/ Y).
+  intros [x | nx] [y | ny]. 
+  - left. auto.
+  - left. auto.
+  - left. auto.
+  - right. intros [x | y]; auto.
+Defined.
+
+Definition and_dec (X Y : Prop) : dec X -> dec Y -> dec (X /\ Y).
+  intros [x | nx] [y | ny].
+  - left. auto. 
+  - right. intros [_ y]. exact (ny y). 
+  - right. intros [x _]. exact (nx x).
+  - right. intros [x _]. exact (nx x).
+Defined.
+
+(*6*)
+
+Definition nat_cert : forall x y : nat, {x < y} + {x = y} + {x > y}.
+Proof.
+  intros x y. apply lt_eq_lt_dec.
+Defined.
+
+Definition bool_cert : forall x y : bool, {x = y} + {x <> y}.
+Proof.
+  intros x y. destruct x, y.
+  - left. reflexivity.
+  - right. congruence.
+  - right. congruence.
+  - left. reflexivity. 
+Defined.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
