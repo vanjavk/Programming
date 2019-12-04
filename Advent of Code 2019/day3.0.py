@@ -16,7 +16,7 @@ def Distance(x1,x2,x3,x4,y1,y2,y3,y4):
 		return abs(intersection[0])+abs(intersection[1])
 	else:
 		return -1
-#Distance(0+1,1+1,0+1,-1+1,0+1,0+1,0+1,0+1)
+#Distance(0+1,1+1,0+1,-1+1,0+1,0+1,0+1,0+1) 
 """
 Distance(0,2,1,1,0,0,3,1)
 Distance(0,2,1,1,0,0,3,1) #NE SIJEKU SE gore
